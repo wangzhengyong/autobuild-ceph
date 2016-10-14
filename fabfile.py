@@ -141,7 +141,7 @@ def _rh_gitbuilder(flavor, git_repo, extra_remotes={}, extra_packages=[], ignore
     extra_remotes will be fetch but not autobuilt. useful for tags.
     """
     gitbuilder_commit='master'
-    gitbuilder_origin='git://github.com/ceph/gitbuilder.git'
+    gitbuilder_origin='https://github.com/wangzhengyong/gitbuilder.git'
 
     sudo("initctl list|grep -q '^autobuild-ceph\s' && stop autobuild-ceph || /etc/init.d/autobuild-ceph stop || :")
     #
@@ -182,8 +182,8 @@ def _rh_gitbuilder(flavor, git_repo, extra_remotes={}, extra_packages=[], ignore
     local('rm -f bundle')
     with cd('/srv/autobuild-ceph'):
         sudo('git init')
-        sudo('test -d /home/ubuntu || ln -sf /home/centos /home/ubuntu')
-        sudo('git pull /home/ubuntu/bundle {branch_to_bundle}'.format(branch_to_bundle=branch_to_bundle))
+        #sudo('test -d /home/ubuntu || ln -sf /home/centos /home/ubuntu')
+        sudo('git pull /root/bundle {branch_to_bundle}'.format(branch_to_bundle=branch_to_bundle))
         sudo('ln -sf build-{flavor}.sh build.sh'.format(flavor=flavor))
         brand_new = False
         if not exists('gitbuilder.git'):
@@ -227,19 +227,19 @@ def _rh_gitbuilder(flavor, git_repo, extra_remotes={}, extra_packages=[], ignore
             if brand_new:
                 sudo('/srv/autobuild-ceph/mark_all_as_pass.sh',
                      user='autobuild-ceph')
-                with cd('/srv'):
-                    if not exists('gnupg'):
-                        sudo('mkdir gnupg')
-                    sudo('chown autobuild-ceph:autobuild-ceph gnupg ; chmod 700 gnupg')
-                    with cd('gnupg'):
-                        if not exists('pubring.gpg'):
-                            # put doesn't honor cd() for some reason
-                            put('gnupg/pubring.gpg')
-                            put('gnupg/secring.gpg')
-                            put('trustdb.gpg')
-                            sudo("mv /home/ubuntu/*.gpg ./")
-                            sudo('chown autobuild-ceph:autobuild-ceph pubring.gpg secring.gpg trustdb.gpg')
-                            sudo('chmod 600 pubring.gpg secring.gpg trustdb.gpg')
+               # with cd('/srv'):
+               #     if not exists('gnupg'):
+               #         sudo('mkdir gnupg')
+               #     sudo('chown autobuild-ceph:autobuild-ceph gnupg ; chmod 700 gnupg')
+               #     with cd('gnupg'):
+               #         if not exists('pubring.gpg'):
+               #             # put doesn't honor cd() for some reason
+               #             put('gnupg/pubring.gpg')
+               #             put('gnupg/secring.gpg')
+               #             put('trustdb.gpg')
+               #             sudo("mv /home/ubuntu/*.gpg ./")
+               #             sudo('chown autobuild-ceph:autobuild-ceph pubring.gpg secring.gpg trustdb.gpg')
+               #             sudo('chmod 600 pubring.gpg secring.gpg trustdb.gpg')
         with cd('/srv/autobuild-ceph'):
             if ignore:
                 sudo('install -d -m0755 --owner=autobuild-ceph --group=autobuild-ceph gitbuilder.git/out/ignore')
@@ -306,8 +306,8 @@ def _gitbuilder(flavor, git_repo, extra_remotes={}, extra_packages=[], ignore=[]
     with cd('/srv/autobuild-ceph'):
         sudo('git init')
         # blarg
-        sudo('test -d /home/ubuntu || ln -sf /home/debian /home/ubuntu')
-        sudo('git pull /home/ubuntu/bundle {branch_to_bundle}'.format(branch_to_bundle=branch_to_bundle))
+        #sudo('test -d /home/ubuntu || ln -sf /home/debian /home/ubuntu')
+        #sudo('git pull /home/ubuntu/bundle {branch_to_bundle}'.format(branch_to_bundle=branch_to_bundle))
         sudo('ln -sf build-{flavor}.sh build.sh'.format(flavor=flavor))
         brand_new = False
         if not exists('gitbuilder.git'):
@@ -684,13 +684,10 @@ def gitbuilder_auto():
 
 @roles('gitbuilder_ceph_rpm')
 def gitbuilder_ceph_rpm():
-    _gitbuilder_ceph_rpm('https://github.com/ceph/ceph.git', 'auto',
-                         extra_remotes=dict(
-                             ci='https://github.com/ceph/ceph-ci.git'
-                         ))
-    hostname = run('hostname -s')
-    flavor = hostname.split('-')[-1]
-    _sync_to_gitbuilder('ceph', 'rpm', flavor)
+    _gitbuilder_ceph_rpm('https://github.com/BC-SDS/ceph.git', 'auto')
+    #hostname = run('hostname -s')
+    #flavor = hostname.split('-')[-1]
+    #_sync_to_gitbuilder('ceph', 'rpm', flavor)
 
 def _gitbuilder_ceph_rpm(url, flavor, extra_remotes={}):
     if '6-' in run('hostname -s'):
@@ -899,15 +896,11 @@ def authorize_ssh_keys():
 
 @roles('pre_cxx11')
 def install_filter_branches():
-    """install 111 a filter-branches file so old builders will only look at branches before Infernalis
+    """install a filter-branches file so old builders will only look at branches before Infernalis
     """
     filter_branches_path = '/srv/autobuild-ceph/filter-branches'
     # only keep the branches with following keywords in it.
-    pre_cxx11_branches = ['hammer',
-                          'giant',
-                          'firefly',
-                          'emperor',
-                          'dumpling']
+    pre_cxx11_branches = ['redhat-base']
     sudo('touch {filter}'.format(filter=filter_branches_path))
     append(filter_branches_path,
            '\n'.join(pre_cxx11_branches),

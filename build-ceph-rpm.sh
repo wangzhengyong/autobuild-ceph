@@ -28,13 +28,13 @@ BRANCH=$(basename $BRANCH)
 echo "Building branch=$BRANCH, sha1=$REV, version=$VER"
 
 # set up key for signing RPMs
-export GNUPGHOME=/srv/gnupg
-KEYID=03C3951A
-if ! gpg --list-keys 2>&1 | grep $KEYID  > /dev/null
-then
-    echo "Can not find RPM signing key" 1>&2
-    exit 4
-fi
+#export GNUPGHOME=/srv/gnupg
+#KEYID=03C3951A
+#if ! gpg --list-keys 2>&1 | grep $KEYID  > /dev/null
+#then
+#    echo "Can not find RPM signing key" 1>&2
+#    exit 4
+#fi
 
 
 # clear out any $@ potentially passed in
@@ -196,25 +196,22 @@ cat <<EOF > $BUILDAREA/SOURCES/ceph.repo
 name=Ceph packages for \$basearch
 baseurl=http://gitbuilder.ceph.com/${TARGET}/ref/${BRANCH}/\$basearch
 enabled=1
-gpgcheck=1
+gpgcheck=0
 type=rpm-md
-gpgkey=https://download.ceph.com/keys/autobuild.asc
 
 [Ceph-noarch]
 name=Ceph noarch packages
 baseurl=http://gitbuilder.ceph.com/${TARGET}/ref/${BRANCH}/noarch
 enabled=1
-gpgcheck=1
+gpgcheck=0
 type=rpm-md
-gpgkey=https://download.ceph.com/keys/autobuild.asc
 
 [ceph-source]
 name=Ceph source packages
 baseurl=http://gitbuilder.ceph.com/${TARGET}/ref/${BRANCH}/SRPMS
 enabled=1
-gpgcheck=1
+gpgcheck=0
 type=rpm-md
-gpgkey=https://download.ceph.com/keys/autobuild.asc
 EOF
 # End of ceph.repo file
 
@@ -228,19 +225,19 @@ then
 fi
 
 # Sign RPMS
-export GNUPGHOME=/srv/gnupg
-echo "Signing RPMS ..."
-for file in `find ${BUILDAREA} -name "*.rpm"`
-do
-    /srv/autobuild-ceph/rpm-autosign.exp --define "_gpg_name $KEYID" $file
-done
+#export GNUPGHOME=/srv/gnupg
+#echo "Signing RPMS ..."
+#for file in `find ${BUILDAREA} -name "*.rpm"`
+#do
+#    /srv/autobuild-ceph/rpm-autosign.exp --define "_gpg_name $KEYID" $file
+#done
 
 # Create repo index for yum/zypper
-for dir in ${BUILDAREA}/SRPMS ${BUILDAREA}/RPMS/*
-do
-    createrepo ${dir}
-    gpg --detach-sign --armor -u $KEYID ${dir}/repodata/repomd.xml
-done
+#for dir in ${BUILDAREA}/SRPMS ${BUILDAREA}/RPMS/*
+#do
+#    createrepo ${dir}
+#    gpg --detach-sign --armor -u $KEYID ${dir}/repodata/repomd.xml
+#done
 
 #REV="$(git rev-parse HEAD)"
 OUTDIR="../out/output/sha1/$REV"
