@@ -685,9 +685,9 @@ def gitbuilder_auto():
 @roles('gitbuilder_ceph_rpm')
 def gitbuilder_ceph_rpm():
     _gitbuilder_ceph_rpm('https://github.com/BC-SDS/ceph.git', 'auto')
-    #hostname = run('hostname -s')
-    #flavor = hostname.split('-')[-1]
-    #_sync_to_gitbuilder('ceph', 'rpm', flavor)
+    hostname = run('hostname -s')
+    flavor = hostname.split('-')[-1]
+    _sync_to_gitbuilder('ceph', 'rpm', flavor)
 
 def _gitbuilder_ceph_rpm(url, flavor, extra_remotes={}):
     if '6-' in run('hostname -s'):
@@ -779,7 +779,7 @@ def _sync_to_gitbuilder(package, format, flavor):
             dist_or_codename=dist_or_codename,
             flavor=flavor))
         sudo('sed -i "s;redhatenterpriseserver;rhel;g" rsync-target')
-        _sync_rsync_keys()
+        #_sync_rsync_keys()
 
 def _sync_rsync_keys():
     if not exists('rsync-key'):
