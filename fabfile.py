@@ -900,7 +900,7 @@ def install_filter_branches():
     """
     filter_branches_path = '/srv/autobuild-ceph/filter-branches'
     # only keep the branches with following keywords in it.
-    pre_cxx11_branches = ['redhat-base']
+    pre_cxx11_branches = ['bc-sds']
     sudo('touch {filter}'.format(filter=filter_branches_path))
     append(filter_branches_path,
            '\n'.join(pre_cxx11_branches),
