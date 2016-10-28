@@ -496,7 +496,8 @@ def doit(output, verbose):
     else:
         fmt = '{1}'
 
-    for l in [priority, normal, filtered_tags]:
+    #for l in [priority, normal, filtered_tags]:
+    for l in [priority, normal]:
         for (obj, ref) in l:
             print >>output, fmt.format(obj, ref)
 
