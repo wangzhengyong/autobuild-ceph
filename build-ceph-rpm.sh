@@ -194,21 +194,21 @@ EOF
 cat <<EOF > $BUILDAREA/SOURCES/ceph.repo
 [Ceph]
 name=Ceph packages for \$basearch
-baseurl=http://gitbuilder.ceph.com/${TARGET}/ref/${BRANCH}/\$basearch
+baseurl=http://10.254.9.15:8088/${TARGET}/ref/${BRANCH}/\$basearch
 enabled=1
 gpgcheck=0
 type=rpm-md
 
 [Ceph-noarch]
 name=Ceph noarch packages
-baseurl=http://gitbuilder.ceph.com/${TARGET}/ref/${BRANCH}/noarch
+baseurl=http://10.254.9.15:8088/${TARGET}/ref/${BRANCH}/noarch
 enabled=1
 gpgcheck=0
 type=rpm-md
 
 [ceph-source]
 name=Ceph source packages
-baseurl=http://gitbuilder.ceph.com/${TARGET}/ref/${BRANCH}/SRPMS
+baseurl=http://10.254.9.15:8088/${TARGET}/ref/${BRANCH}/SRPMS
 enabled=1
 gpgcheck=0
 type=rpm-md
@@ -282,4 +282,29 @@ fi
 mv -- "$OUTDIR_TMP" "$OUTDIR"
 rm -rf -- "$OUTDIR.old"
 
-exit 0
+
+RPMBUILD=/rpmbuild/${TARGET}
+OUT="../out/output"
+
+if [ ! -e /rpmbuild ];then
+	sudo mkdir  /rpmbuild
+	sudo chmod 755 /rpmbuild -R
+fi
+
+if [ -d "$RPMBUILD" ];then
+        sudo rm "$RPMBUILD" -rf
+fi
+
+sudo mkdir -p "$RPMBUILD"
+sudo chmod 755 -R "$RPMBUILD"
+
+if [ -d "$RPMBUILD" ]; then
+        sudo cp -r $OUT/* "$RPMBUILD"
+        sudo createrepo -v "$RPMBUILD"/ref/${BRANCH}/x86_64
+        sudo createrepo -v "$RPMBUILD"/ref/${BRANCH}/noarch
+        sudo createrepo -v "$RPMBUILD"/ref/${BRANCH}/SRPMS
+        exit 0
+else
+        echo "error: copy release failed"
+        exit 8
+fi
